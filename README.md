@@ -73,4 +73,8 @@ npm run build
 
 
 ## Sys Design : 
+<<<<<<< HEAD
 ![Architecture](./dist/assets/architecture/system_designe.png)
+=======
+![Architecture](./assets/architecture/system_designe.png)
+>>>>>>> 3ec51fb6b652ba5f73ca7f207dd1ced8c9bc69a1
