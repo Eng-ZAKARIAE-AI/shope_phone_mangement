@@ -73,5 +73,4 @@ npm run build
 
 
 ## Sys Design : 
-
-![Architecture](C:\Users\nourn\Desktop\dev\shope_phone_mangement\dist\assets\architecture\system_designe.png)
+![Architecture](./assets/architecture/system_designe.png)
