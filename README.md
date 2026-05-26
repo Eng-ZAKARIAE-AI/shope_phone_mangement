@@ -74,5 +74,5 @@ npm run build
 
 ## Sys Design :
 
-![plot](./assets/architecture/system_designe.png)
+![plot](./dist/assets/architecture/system_designe.png)
 
