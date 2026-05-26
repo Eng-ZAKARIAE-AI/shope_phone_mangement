@@ -72,9 +72,6 @@ npm run dev
 npm run build
 
 
-![plot](https://github.com/Eng-ZAKARIAE-AI/shope_phone_mangement/main/docs/architecture/system_design.png)
+## Sys Design : 
 
-## Sys Design :
-
-![plot](./docs/architecture/system_design.png)
-
+![plot](https://github.com/Eng-ZAKARIAE-AI/shope_phone_mangement/main/dist/docs/architecture/system_design.png)
