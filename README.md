@@ -70,3 +70,8 @@ npm run dev
 
 # Build for production
 npm run build
+
+
+## Sys Design : 
+
+![Architecture](C:\Users\nourn\Desktop\dev\shope_phone_mangement\dist\assets\architecture\system_designe.png)
