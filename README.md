@@ -73,4 +73,4 @@ npm run build
 
 
 ## Sys Design :
-![Architecture](./assets/architecture/system_designe.png)
+![alt text](http://./assets/architecture/system_designe.png)
