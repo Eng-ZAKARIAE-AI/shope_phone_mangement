@@ -74,4 +74,4 @@ npm run build
 
 ## Sys Design : 
 
-![plot](https://github.com/Eng-ZAKARIAE-AI/shope_phone_mangement/main/dist/docs/architecture/system_design.png)
+see this @dist/assets/architecture/system_designe.png
