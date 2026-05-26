@@ -1,0 +1,152 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net: Default Deny All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Core Helper Functions ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && (
+        request.auth.token.email_verified == true || 
+        request.auth.token.email == 'admin@tecno.com' ||
+        request.auth.token.email.matches('.*@tecno\\.com') ||
+        request.auth.token.email.matches('(?i).*zakariaeelhaddouchi.*')
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Role Lookup Functions
+    function getUserRole(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data.role;
+    }
+
+    function isStaff() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return isStaff() && getUserRole(request.auth.uid) == 'admin';
+    }
+
+    // --- Schema & Constraint Validation Blueprints ---
+
+    function isValidProduct(data) {
+      return data.keys().hasAll(['name', 'brand', 'category', 'sku', 'quantity', 'unitPrice', 'stockStatus', 'createdAt', 'updatedBy', 'updatedAt'])
+        && data.keys().size() == 10
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.brand is string && data.brand.size() > 0 && data.brand.size() <= 50
+        && data.category is string && (data.category == 'Phones' || data.category == 'Watches' || data.category == 'Accessories')
+        && data.sku is string && data.sku.size() > 0 && data.sku.size() <= 50
+        && data.quantity is int && data.quantity >= 0
+        && data.unitPrice is number && data.unitPrice > 0
+        && data.updatedBy is string && data.updatedBy.size() > 0
+        && (
+          (data.quantity == 0 && data.stockStatus == 'Out of Stock') ||
+          (data.quantity >= 1 && data.quantity < 5 && data.stockStatus == 'Low Stock') ||
+          (data.quantity >= 5 && data.stockStatus == 'In Stock')
+        );
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email', 'displayName', 'role', 'createdAt', 'lastLogin'])
+        && data.keys().size() == 6
+        && data.uid == request.auth.uid
+        && data.email == request.auth.token.email
+        && data.displayName is string && data.displayName.size() > 0 && data.displayName.size() <= 100
+        && data.role is string && (data.role == 'admin' || data.role == 'staff')
+        && (
+          (data.role == 'admin' && (request.auth.token.email.matches('(?i).*zakariaeelhaddouchi.*') || request.auth.token.email == 'admin@tecno.com'))
+          || data.role == 'staff'
+        );
+    }
+
+    function isValidInventoryLog(data) {
+      return data.keys().hasAll(['productId', 'productName', 'operatorId', 'operatorEmail', 'action', 'preQuantity', 'postQuantity', 'timestamp'])
+        && data.keys().size() == 8
+        && data.productId is string && data.productId.size() > 0 && data.productId.size() <= 128
+        && data.productName is string && data.productName.size() > 0 && data.productName.size() <= 100
+        && data.operatorId == request.auth.uid
+        && data.operatorEmail == request.auth.token.email
+        && data.action is string && (data.action == 'create' || data.action == 'update' || data.action == 'delete' || data.action == 'adjust_increment' || data.action == 'adjust_decrement' || data.action == 'seed')
+        && data.preQuantity is int && data.preQuantity >= 0
+        && data.postQuantity is int && data.postQuantity >= 0;
+    }
+
+    // --- Collection Routes & Access Locks ---
+
+    match /products/{productId} {
+      allow get: if isStaff() && isValidId(productId);
+      allow list: if isStaff();
+
+      allow create: if isVerifiedUser()
+        && isStaff()
+        && isValidId(productId)
+        && isValidProduct(incoming())
+        && incoming().updatedBy == request.auth.token.email
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedUser()
+        && isStaff()
+        && isValidId(productId)
+        && isValidProduct(incoming())
+        && incoming().updatedBy == request.auth.token.email
+        && incoming().updatedAt == request.time
+        && incoming().createdAt == existing().createdAt
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['name', 'brand', 'category', 'sku', 'unitPrice', 'quantity', 'stockStatus', 'updatedBy', 'updatedAt']) ||
+          incoming().diff(existing()).affectedKeys().hasOnly(['quantity', 'stockStatus', 'updatedBy', 'updatedAt'])
+        );
+
+      allow delete: if isAdmin() && isValidId(productId);
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isStaff());
+      allow list: if isStaff();
+
+      allow create: if isSignedIn()
+        && request.auth.uid == userId
+        && isValidUserProfile(incoming())
+        && incoming().createdAt == request.time
+        && incoming().lastLogin == request.time;
+
+      allow update: if isSignedIn() && (
+        (request.auth.uid == userId && incoming().diff(existing()).affectedKeys().hasOnly(['lastLogin']) && incoming().lastLogin == request.time) ||
+        (isAdmin() && incoming().diff(existing()).affectedKeys().hasOnly(['role']) && isValidUserProfile(incoming()))
+      );
+
+      allow delete: if false; // User accounts are never deleted to preserve audit logs consistency
+    }
+
+    match /inventory_logs/{logId} {
+      allow get: if isStaff() && isValidId(logId);
+      allow list: if isStaff();
+
+      allow create: if isStaff()
+        && isValidInventoryLog(incoming())
+        && incoming().timestamp == request.time;
+
+      allow update, delete: if false; // System audit traces are strictly append-only & immutable
+    }
+
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A retail electronics product inventory record representing Tecno smartphones, smartwatches, and accessories.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the product document."
+        },
+        "name": {
+          "type": "string",
+          "description": "Full product name (e.g., Tecno Camon 20 Pro)."
+        },
+        "brand": {
+          "type": "string",
+          "description": "The manufacturer brand of the device (e.g., Tecno, Generic, etc.)."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["Phones", "Watches", "Accessories"],
+          "description": "Type classification of the product."
+        },
+        "sku": {
+          "type": "string",
+          "description": "Stock Keeping Unit unique tracker code."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The stock quantity level."
+        },
+        "unitPrice": {
+          "type": "number",
+          "description": "Price per unit item."
+        },
+        "stockStatus": {
+          "type": "string",
+          "enum": ["In Stock", "Low Stock", "Out of Stock"],
+          "description": "Automatically updated stock level indicator."
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Firebase UID of the staff member who registered the product."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Record creation timestamp."
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "Firebase UID of the last staff member who modified the catalog item."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last modification timestamp."
+        }
+      },
+      "required": ["name", "brand", "category", "sku", "quantity", "unitPrice", "stockStatus"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "A store employee or administrator authorization profile.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase authentication User ID."
+        },
+        "email": {
+          "type": "string",
+          "description": "Google email address of the employee."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "staff"],
+          "description": "Auth authorization role limits."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp."
+        },
+        "lastLogin": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last login synchronization event."
+        }
+      },
+      "required": ["uid", "email", "displayName", "role", "createdAt", "lastLogin"]
+    },
+    "InventoryLog": {
+      "title": "InventoryLog",
+      "description": "Historic system modification and stock transformation trace.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique auto-generated record ID."
+        },
+        "productId": {
+          "type": "string",
+          "description": "Target modified device ID."
+        },
+        "productName": {
+          "type": "string",
+          "description": "Target modified device title."
+        },
+        "operatorId": {
+          "type": "string",
+          "description": "Firebase UID of modifying staff member."
+        },
+        "operatorEmail": {
+          "type": "string",
+          "description": "Email address of modifying staff member."
+        },
+        "action": {
+          "type": "string",
+          "enum": ["create", "update", "delete", "adjust_increment", "adjust_decrement", "seed"],
+          "description": "The operation category."
+        },
+        "preQuantity": {
+          "type": "number",
+          "description": "Product quantity level before operation."
+        },
+        "postQuantity": {
+          "type": "number",
+          "description": "Product quantity level after completion."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "System event timestamp."
+        }
+      },
+      "required": ["productId", "productName", "operatorId", "operatorEmail", "action", "preQuantity", "postQuantity", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "The complete database of electronics stocks and catalog products."
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Store employees registry and role configurations metadata."
+    },
+    "/inventory_logs/{logId}": {
+      "schema": "InventoryLog",
+      "description": "Immutable system logs capturing stock level modifications."
+    }
+  }
+}
