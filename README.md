@@ -1,22 +1,22 @@
-# 📱 Tecno Tech Shop Stockroom Manager
+# Tech Shop Stockroom Manager
 
 A production-grade, containerized full-stack stock management application for a retail electronics shop. Specialized for tracking **Tecno devices**, smartwatches, and accessories with real-time synchronization and enterprise security.
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- **🔄 Real-time Inventory Sync**: Instant updates across all clients using Firestore's reactive listeners.
-- **📊 Advanced Analytics**: Visual distribution of stock categories and pricing using Recharts.
-- **🛡️ Enterprise Security**: RBAC (Role-Based Access Control) and "Dirty Dozen" vulnerability protection.
-- **📝 Audit Ledger**: Immutable history of every stock adjustment, creation, and deletion.
-- **🧪 Sandbox Mode**: LocalStorage-driven demo mode for testing without Firebase credentials.
-- **🌓 Adaptive UI**: Responsive design with full Dark/Light mode support via Tailwind CSS 4.
-- **🐳 Containerized**: Fully Dockerized environment for seamless deployment and development.
+- **Real-time Inventory Sync**: Instant updates across all clients using Firestore's reactive listeners.
+- **Advanced Analytics**: Visual distribution of stock categories and pricing using Recharts.
+- **Enterprise Security**: RBAC (Role-Based Access Control) and "Dirty Dozen" vulnerability protection.
+- **Audit Ledger**: Immutable history of every stock adjustment, creation, and deletion.
+- **Sandbox Mode**: LocalStorage-driven demo mode for testing without Firebase credentials.
+- **Adaptive UI**: Responsive design with full Dark/Light mode support via Tailwind CSS 4.
+- **Containerized**: Fully Dockerized environment for seamless deployment and development.
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Layer | Technologies |
 |--- |--- |
@@ -29,7 +29,7 @@ A production-grade, containerized full-stack stock management application for a 
 
 ---
 
-## 📂 Architecture Layout
+## Architecture Layout
 
 ```text
 ├── /frontend               # React Single-Page Application
@@ -58,25 +58,10 @@ A production-grade, containerized full-stack stock management application for a 
 ├── firestore.rules        # Security-first Database Validation
 ├── firebase-blueprint.json # Schema Definition & Seed Data
 └── metadata.json          # System Permissions Manifest
-```
 
----
 
-## 🚀 Getting Started
 
-### 1. Docker Deployment (Recommended)
-Build and spin up the multi-container environment (Frontend Nginx + Backend API) in a single command:
-
-```bash
-docker compose up --build
-```
-- **Frontend**: `http://localhost:3000`
-- **Backend API**: `http://localhost:8080`
-
-### 2. Local Development
-For rapid frontend iterations with hot-reloading:
-
-```bash
+## how to Run this : => MVP :
 # Install dependencies (Root)
 npm install
 
@@ -85,25 +70,3 @@ npm run dev
 
 # Build for production
 npm run build
-```
-
----
-
-## 🛡️ Security & Data Invariants
-
-The system enforces strict data integrity via **Firestore Security Rules**:
-- **Role Validation**: Only `admin` accounts can delete records.
-- **Logic Invariants**: `quantity` must match `stockStatus` (e.g., 0 units MUST be "Out of Stock").
-- **Audit Trails**: Every write must include a corresponding entry in `inventory_logs`.
-- **Field Protection**: Prevents "Phantom Field" injection and identity spoofing.
-
----
-
-## 📑 Domain Schema
-
-- **`products`**: `name`, `brand`, `sku`, `quantity`, `unitPrice`, `stockStatus`, `updatedBy`.
-- **`users`**: `uid`, `email`, `displayName`, `role` (admin | staff).
-- **`inventory_logs`**: `productId`, `operatorEmail`, `action` (create/update/adjust/delete), `preQuantity`, `postQuantity`.
-
----
-*Maintained for Tecno Authorized Retailers.*
